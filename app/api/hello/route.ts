@@ -1,5 +1,5 @@
 import { Aptos, AptosConfig, Ed25519PrivateKey, Network, PrivateKey, PrivateKeyVariants } from "@aptos-labs/ts-sdk"
-import { ChatAnthropic } from "@langchain/anthropic"
+import { ChatOpenAI } from "@langchain/openai"
 import { AIMessage, BaseMessage, ChatMessage, HumanMessage } from "@langchain/core/messages"
 import { MemorySaver } from "@langchain/langgraph"
 import { createReactAgent } from "@langchain/langgraph/prebuilt"
@@ -7,11 +7,35 @@ import { Message as VercelChatMessage } from "ai"
 import { AgentRuntime, LocalSigner, createAptosTools } from "move-agent-kit"
 import { NextResponse } from "next/server"
 
-const llm = new ChatAnthropic({
-	temperature: 0.7,
-	model: "claude-3-5-sonnet-latest",
-	apiKey: process.env.ANTHROPIC_API_KEY,
-})
+
+// TODO: make a key at openrouter.ai/keys and put it in .env
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
+const OPENROUTER_BASE_URL =
+	process.env.OPENROUTER_BASE_URL;
+
+// @ts-ignore
+const llm = new ChatOpenAI(
+	{
+		modelName: "deepseek/deepseek-r1-zero:free",
+		// modelName: "tiiuae/falcon-40b-instruct",
+		// modelName: "anthropic/claude-instant-v1",
+		// modelName: "anthropic/claude-2",
+		// modelName: "google/palm-2-chat-bison",
+		temperature: 0.8,
+		maxTokens: 300,
+		streaming: true,
+		openAIApiKey: OPENROUTER_API_KEY,
+	},
+	// {
+	// 	basePath: `${OPENROUTER_BASE_URL}/api/v1`,
+	// 	baseOptions: {
+	// 		headers: {
+	// 			"HTTP-Referer": "https://localhost:3000/",
+	// 			"X-Title": "Langchain.js Testing",
+	// 		},
+	// 	},
+	// }
+)
 
 const textDecoder = new TextDecoder()
 
@@ -74,7 +98,7 @@ export async function POST(request: Request) {
 	try {
 		// Initialize Aptos configuration
 		const aptosConfig = new AptosConfig({
-			network: Network.MAINNET,
+			network: Network.TESTNET,
 		})
 
 		const aptos = new Aptos(aptosConfig)
