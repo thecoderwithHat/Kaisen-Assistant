@@ -14,29 +14,14 @@ const OPENROUTER_BASE_URL =
 	process.env.OPENROUTER_BASE_URL;
 
 // @ts-ignore
-const llm = new ChatOpenAI(
-	{
-		modelName: "deepseek/deepseek-r1-zero:free",
-		// modelName: "tiiuae/falcon-40b-instruct",
-		// modelName: "anthropic/claude-instant-v1",
-		// modelName: "anthropic/claude-2",
-		// modelName: "google/palm-2-chat-bison",
-		temperature: 0.8,
-		maxTokens: 300,
-		streaming: true,
-		openAIApiKey: OPENROUTER_API_KEY,
+const llm = await new ChatOpenAI({
+	modelName: "google/gemini-2.0-flash-001",
+	openAIApiKey: process.env.OPENROUTER_API_KEY,
+	configuration: {
+		baseURL: "https://openrouter.ai/api/v1",
 	},
-	// {
-	// 	basePath: `${OPENROUTER_BASE_URL}/api/v1`,
-	// 	baseOptions: {
-	// 		headers: {
-	// 			"HTTP-Referer": "https://localhost:3000/",
-	// 			"X-Title": "Langchain.js Testing",
-	// 		},
-	// 	},
-	// }
-)
-
+	streaming: true,
+	})
 const textDecoder = new TextDecoder()
 
 // Function to read and process the stream
