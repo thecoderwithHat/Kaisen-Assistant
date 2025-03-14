@@ -6,23 +6,53 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt"
 import { Message as VercelChatMessage } from "ai"
 import { AgentRuntime, LocalSigner, createAptosTools } from "move-agent-kit"
 import { NextResponse } from "next/server"
+import { DynamicStructuredTool } from "@langchain/core/tools"
+import { z } from "zod"
+
+// Import the LLMTradingAnalyzer
+import LLMTradingAnalyzer from "@/tools/twitter/llm-analyzer"
+
 
 
 // TODO: make a key at openrouter.ai/keys and put it in .env
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
-const OPENROUTER_BASE_URL =
-	process.env.OPENROUTER_BASE_URL;
+const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1"
 
-// @ts-ignore
-const llm = await new ChatOpenAI({
-	modelName: "google/gemini-2.0-flash-001",
-	openAIApiKey: process.env.OPENROUTER_API_KEY,
-	configuration: {
-		baseURL: "https://openrouter.ai/api/v1",
-	},
-	streaming: true,
-	})
 const textDecoder = new TextDecoder()
+
+// Create a trading analyzer tool
+function createTradingAnalyzerTool(analyzer: LLMTradingAnalyzer) {
+	return new DynamicStructuredTool({
+		name: "analyze_crypto_sentiment",
+		description: "Analyzes Twitter sentiment for a cryptocurrency and provides trading recommendations",
+		schema: z.object({
+			cryptoSymbol: z.string().describe("The cryptocurrency symbol (e.g., BTC, ETH, SOL)"),
+			query: z.string().describe("The Twitter search query to analyze"),
+			totalTweets: z.number().optional().describe("Total number of tweets analyzed"),
+			totalCryptoTweets: z.number().optional().describe("Number of crypto-related tweets"),
+			positiveCount: z.number().optional().describe("Number of potentially positive tweets"),
+			hashtags: z.array(z.string()).optional().describe("Top hashtags found in the tweets")
+		}),
+		func: async ({ cryptoSymbol, query, totalTweets = 1000, totalCryptoTweets = 800, positiveCount = 500, hashtags = ["#crypto"] }) => {
+			// Create a ScraperResult object from the inputs
+			const scraperResult = {
+				query,
+				totalTweets,
+				analysis: {
+					totalCryptoTweets,
+					potentiallyPositiveTweets: positiveCount,
+					topHashtags: hashtags
+				}
+			};
+
+			// Use the analyzer to get a recommendation
+			const recommendation = await analyzer.analyzeTradingDecision(scraperResult, cryptoSymbol);
+
+			// Return the recommendation as a formatted string
+			return JSON.stringify(recommendation, null, 2);
+		}
+	});
+}
 
 // Function to read and process the stream
 async function readStream(stream: any) {
@@ -103,19 +133,51 @@ export async function POST(request: Request) {
 		const aptosAgent = new AgentRuntime(signer, aptos, {
 			PANORA_API_KEY: process.env.PANORA_API_KEY,
 		})
-		const tools = createAptosTools(aptosAgent)
+
+		// Initialize the LLM
+		// @ts-ignore
+		const llm = await new ChatOpenAI({
+			modelName: "google/gemini-2.0-flash-001",
+			openAIApiKey: OPENROUTER_API_KEY,
+			configuration: {
+				baseURL: OPENROUTER_BASE_URL,
+			},
+			streaming: true,
+		})
+
+		// Initialize the Trading Analyzer
+		const tradingAnalyzer = new LLMTradingAnalyzer(
+			OPENROUTER_API_KEY || "",
+			"https://yourwebsite.com", // Your site URL for OpenRouter analytics
+			"Crypto Trading Assistant" // Your app name for OpenRouter analytics
+		)
+
+		// Get the Aptos tools
+		const aptosTools = createAptosTools(aptosAgent)
+
+		// Create the trading analyzer tool
+		const tradingAnalyzerTool = createTradingAnalyzerTool(tradingAnalyzer)
+
+		// Combine all tools
+		const allTools = [...aptosTools, tradingAnalyzerTool]
+
 		const memory = new MemorySaver()
 
-		// Create React agent
+		// Create React agent with combined tools
 		const agent = createReactAgent({
 			llm,
-			tools,
+			tools: allTools,
 			checkpointSaver: memory,
 			messageModifier: `
-        You are a helpful agent that can interact onchain using the Aptos Agent Kit. You are
-        empowered to interact onchain using your tools. If you ever need funds, you can request them from the
-        faucet. If not, you can provide your wallet details and request funds from the user. If there is a 5XX
-        (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
+        You are a helpful agent that can interact onchain using the Aptos Agent Kit and analyze cryptocurrency trading sentiment. You are
+        empowered to interact onchain using your tools and provide trading recommendations based on Twitter sentiment analysis.
+        
+        If you ever need funds, you can request them from the faucet. If not, you can provide your wallet details and request funds from the user.
+        
+        You can analyze Twitter sentiment for cryptocurrencies using the analyze_crypto_sentiment tool, which will provide
+        trading recommendations based on social media sentiment. This is useful for users who want to make informed trading decisions.
+        
+        If there is a 5XX (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
         can't do with your currently available tools, you must say so, and encourage them to implement it
         themselves using the Aptos Agent Kit, recommend they go to https://www.aptosagentkit.xyz for more information. Be
         concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested.
@@ -172,17 +234,6 @@ export async function POST(request: Request) {
 					controller.close()
 				},
 			})
-
-			//console.log("transformStream", transformStream)
-
-			//try {
-			//	const decodedContent = await readStream(transformStream);
-			//	console.log('Decoded content:', decodedContent);
-			//	//return decodedContent;
-			//  } catch (error) {
-			//	console.error('Error processing stream:', error);
-			//	throw error;
-			//  }
 
 			return new Response(transformStream)
 		} else {
