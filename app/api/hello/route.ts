@@ -33,17 +33,19 @@ function createTradingAnalyzerTool(analyzer: LLMTradingAnalyzer) {
 			positiveCount: z.number().optional().describe("Number of potentially positive tweets"),
 			hashtags: z.array(z.string()).optional().describe("Top hashtags found in the tweets")
 		}),
-		func: async ({ cryptoSymbol, query, totalTweets = 1000, totalCryptoTweets = 800, positiveCount = 500, hashtags = ["#crypto"] }) => {
-			// Create a ScraperResult object from the inputs
+		func: async ({ cryptoSymbol, query, totalTweets, totalCryptoTweets, positiveCount, hashtags = ["#crypto"] }) => {
+			// Create a ScraperResult object from the inputs with default values
 			const scraperResult = {
 				query,
-				totalTweets,
+				// The AND is not going to get trigger due to generation in TradingAnalyzerTool.ts
+				totalTweets: totalTweets ?? 2000, // Default to 5000 if undefined
 				analysis: {
-					totalCryptoTweets,
-					potentiallyPositiveTweets: positiveCount,
+					totalCryptoTweets: totalCryptoTweets ?? 1800, // Default to 1800 if undefined
+					potentiallyPositiveTweets: positiveCount ?? 1000, // Default to 1000 if undefined
 					topHashtags: hashtags
 				}
 			};
+
 
 			// Use the analyzer to get a recommendation
 			const recommendation = await analyzer.analyzeTradingDecision(scraperResult, cryptoSymbol);

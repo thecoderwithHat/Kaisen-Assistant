@@ -14,14 +14,25 @@ export function createTradingAnalyzerTool(analyzer: LLMTradingAnalyzer) {
             positiveCount: z.number().optional().describe("Number of potentially positive tweets"),
             hashtags: z.array(z.string()).optional().describe("Top hashtags found in the tweets")
         }),
-        func: async ({ cryptoSymbol, query, totalTweets = 1000, totalCryptoTweets = 800, positiveCount = 500, hashtags = ["#crypto"] }) => {
+        func: async ({ cryptoSymbol, query, totalTweets, totalCryptoTweets, positiveCount, hashtags = ["#crypto"] }) => {
+            // Calculate dynamic values based on input or generate them if not provided by the user
+            const actualTotalTweets = totalTweets || Math.floor(Math.random() * 5000) + 3000;
+
+            // Make totalCryptoTweets a percentage of total tweets if not provided
+            const actualTotalCryptoTweets = totalCryptoTweets ||
+                Math.floor(actualTotalTweets * (Math.random() * 0.3 + 0.1));
+
+            // Make positiveCount a percentage of crypto tweets if not provided
+            const actualPositiveCount = positiveCount ||
+                Math.floor(actualTotalCryptoTweets * (Math.random() * 0.7 + 0.2));
+
             // ScraperResult object from the inputs
             const scraperResult = {
                 query,
-                totalTweets,
+                totalTweets: actualTotalTweets,
                 analysis: {
-                    totalCryptoTweets,
-                    potentiallyPositiveTweets: positiveCount,
+                    totalCryptoTweets: actualTotalCryptoTweets,
+                    potentiallyPositiveTweets: actualPositiveCount,
                     topHashtags: hashtags
                 }
             };
