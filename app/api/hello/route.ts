@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 			privateKey: new Ed25519PrivateKey(PrivateKey.formatPrivateKey(privateKeyStr, PrivateKeyVariants.Ed25519)),
 		})
 
-		const signer = new LocalSigner(account, Network.MAINNET)
+		const signer = new LocalSigner(account, Network.TESTNET)
 		const aptosAgent = new AgentRuntime(signer, aptos, {
 			PANORA_API_KEY: process.env.PANORA_API_KEY,
 		})
