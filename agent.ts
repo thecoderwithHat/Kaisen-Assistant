@@ -23,30 +23,30 @@ import {
 	transferTokens,
 	unstakeTokens,
 	withdrawToken,
-} from "../move-agent-kit-main/src/tools"
+} from "./tools"
 import {
 	borrowAriesToken,
 	createAriesProfile,
 	lendAriesToken,
 	repayAriesToken,
 	withdrawAriesToken,
-} from "../move-agent-kit-main/src/tools/aries"
+} from "./tools/aries"
 import {
 	borrowTokenWithEchelon,
 	lendTokenWithEchelon,
 	repayTokenWithEchelon,
 	withdrawTokenWithEchelon,
-} from "../move-agent-kit-main/src/tools/echelon"
-import { stakeTokenWithEcho, unstakeTokenWithEcho } from "../move-agent-kit-main/src/tools/echo"
-import { addLiquidity, createPool, removeLiquidity, swap } from "../move-agent-kit-main/src/tools/liquidswap"
+} from "./tools/echelon"
+import { stakeTokenWithEcho, unstakeTokenWithEcho } from "./tools/echo"
+import { addLiquidity, createPool, removeLiquidity, swap } from "./tools/liquidswap"
 import {
 	closePositionWithMerkleTrade,
 	getPositionsWithMerkleTrade,
 	placeLimitOrderWithMerkleTrade,
 	placeMarketOrderWithMerkleTrade,
-} from "../move-agent-kit-main/src/tools/merkletrade"
-import { createImage } from "../move-agent-kit-main/src/tools/openai"
-import { swapWithPanora } from "../move-agent-kit-main/src/tools/panora"
+} from "./tools/merkletrade"
+import { createImage } from "./tools/openai"
+import { swapWithPanora } from "./tools/panora"
 import {
 	addLiquidityWithThala,
 	createPoolWithThala,
@@ -55,8 +55,8 @@ import {
 	removeLiquidityWithThala,
 	stakeTokenWithThala,
 	unstakeAPTWithThala,
-} from "../move-agent-kit-main/src/tools/thala"
-import { getTokenByTokenName } from "../move-agent-kit-main/src/utils/get-pool-address-by-token-name"
+} from "./tools/thala"
+import { getTokenByTokenName } from "./utils/get-pool-address-by-token-name"
 
 export class AgentRuntime {
 	public account: BaseSigner
