@@ -23,7 +23,7 @@ import {
 	transferTokens,
 	unstakeTokens,
 	withdrawToken,
-} from "./tools"
+} from "@/tools"
 import {
 	borrowAriesToken,
 	createAriesProfile,
