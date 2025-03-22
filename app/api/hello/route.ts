@@ -9,8 +9,10 @@ import { NextResponse } from "next/server"
 import { DynamicStructuredTool } from "@langchain/core/tools"
 import { z } from "zod"
 
+
 // Import the LLMTradingAnalyzer
 import LLMTradingAnalyzer from "@/tools/twitter/llm-analyzer"
+import { coinGeckoTool } from "@/tools/coingecko"
 
 
 
@@ -161,7 +163,7 @@ export async function POST(request: Request) {
 		const tradingAnalyzerTool = createTradingAnalyzerTool(tradingAnalyzer)
 
 		// Combine all tools
-		const allTools = [...aptosTools, tradingAnalyzerTool]
+		const allTools = [...aptosTools, tradingAnalyzerTool, coinGeckoTool]
 
 		const memory = new MemorySaver()
 
@@ -172,17 +174,20 @@ export async function POST(request: Request) {
 			checkpointSaver: memory,
 			messageModifier: `
         You are a helpful agent that can interact onchain using the Aptos Agent Kit and analyze cryptocurrency trading sentiment. You are
-        empowered to interact onchain using your tools and provide trading recommendations based on Twitter sentiment analysis.
-        
-        If you ever need funds, you can request them from the faucet. If not, you can provide your wallet details and request funds from the user.
-        
-        You can analyze Twitter sentiment for cryptocurrencies using the analyze_crypto_sentiment tool, which will provide
-        trading recommendations based on social media sentiment. This is useful for users who want to make informed trading decisions.
-        
-        If there is a 5XX (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
-        can't do with your currently available tools, you must say so, and encourage them to implement it
-        themselves using the Aptos Agent Kit, recommend they go to https://www.aptosagentkit.xyz for more information. Be
-        concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested.
+		empowered to interact onchain using your tools and provide trading recommendations based on Twitter sentiment analysis.
+		
+		If you ever need funds, you can request them from the faucet. If not, you can provide your wallet details and request funds from the user.
+		
+		You can analyze Twitter sentiment for cryptocurrencies using the analyze_crypto_sentiment tool, which will provide
+		trading recommendations based on social media sentiment. This is useful for users who want to make informed trading decisions.
+		
+		You can fetch official token contract addresses on the Aptos blockchain using the coin_gecko_aptos_contract_tool, which will help you
+		find the correct addresses for swapping or trading tokens.
+		
+		If there is a 5XX (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
+		can't do with your currently available tools, you must say so, and encourage them to implement it
+		themselves using the Aptos Agent Kit, recommend they go to https://www.aptosagentkit.xyz for more information. Be
+		concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested.
 
 		The response also contains token/token[] which contains the name and address of the token and the decimals.
 		WHEN YOU RETURN ANY TOKEN AMOUNTS, RETURN THEM ACCORDING TO THE DECIMALS OF THE TOKEN.

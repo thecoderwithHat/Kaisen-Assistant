@@ -57,7 +57,7 @@ import {
 	unstakeAPTWithThala,
 } from "./tools/thala"
 import { getTokenByTokenName } from "./utils/get-pool-address-by-token-name"
-
+import { coinGeckoTool } from "./tools/coingecko";
 export class AgentRuntime {
 	public account: BaseSigner
 	public aptos: Aptos
@@ -296,4 +296,27 @@ export class AgentRuntime {
 	getPositionsWithMerkleTrade() {
 		return getPositionsWithMerkleTrade(this)
 	}
+
+	// Add this method to your AgentRuntime class
+	async getTokenContractAddress(tokenName: string) {
+		// The coinGeckoTool.func returns a Promise<string> with a JSON string
+		const resultJson = await coinGeckoTool.func({ tokenName });
+		// Parse the JSON string to get the actual data
+		const result = JSON.parse(resultJson);
+		
+		if (result.success) {
+		// If it's a single token, return the address
+		if (result.address) {
+			return result.address;
+		} 
+		// If it's multiple tokens, return the first one's address
+		else if (result.tokens && result.tokens.length > 0) {
+			return result.tokens[0].address;
+		}
+		}
+		
+		// Return null or throw an error if no token found
+		return null;
+	}
+
 }
