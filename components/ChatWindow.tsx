@@ -187,8 +187,8 @@ export function ChatWindow(props: {
 					</div>
 				) : (
 					<div className="space-y-6">
-						{[...messages].reverse().map((m, i) => {
-							const sourceKey = (messages.length - 1 - i).toString()
+						{messages.map((m, i) => {
+							const sourceKey = i.toString()
 							return m.role === "system" ? (
 								<IntermediateStep key={m.id} message={m} />
 							) : (
