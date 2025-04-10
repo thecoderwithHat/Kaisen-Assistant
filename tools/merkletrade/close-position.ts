@@ -1,5 +1,5 @@
 import { MerkleClient, MerkleClientConfig } from "@merkletrade/ts-sdk"
-import type { AgentRuntime } from "../../agent"
+import type { AgentRuntime } from "@/agent"
 import { FailedSendTransactionError, MerkleBaseError, PositionNotFoundError } from "./error"
 
 /**
