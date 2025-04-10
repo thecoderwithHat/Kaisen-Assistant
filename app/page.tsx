@@ -49,22 +49,22 @@ export default function Home() {
           What's the current price of $BTC and $APT?
         </button>
         <button
-          onClick={() => handleQuestionClick("Show me the top 5 gainers on Aptos today")}
+          onClick={() => handleQuestionClick("Analyse APT token for me ")}
           className="p-3 rounded-lg border border-[#2A2F3C] text-[#E8EAED] hover:bg-[#2A2F3C] transition-colors max-[600px]:text-xs"
           style={{
             background: "linear-gradient(135deg, #2B2B2B, #151515, #202020)",
           }}
         >
-          Show me the top 5 gainers on Aptos today
+          Analyse APT token for me 
         </button>
         <button
-          onClick={() => handleQuestionClick("Any trending tokens I should watch?")}
+          onClick={() => handleQuestionClick("What can you do ?")}
           className="p-3 rounded-lg border border-[#2A2F3C] text-[#E8EAED] hover:bg-[#2A2F3C] transition-colors max-[600px]:text-xs"
           style={{
             background: "linear-gradient(135deg, #2B2B2B, #151515, #202020)",
           }}
         >
-          Any trending tokens I should watch?
+          What can you do ?
         </button>
       </div>
     </section>
