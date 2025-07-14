@@ -1,35 +1,39 @@
 name: Node.js CI
 
 on:
-    push:
-        branches: [main, develop]
-    pull_request:
-        branches: [main, develop]
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        strategy:
-            matrix:
-                node-version: [14.15.x]
+    strategy:
+      matrix:
+        node-version: [14.15.x]  # You can update this if you're using a different Node.js version
 
-        steps:
-            - uses: actions/checkout@v2
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v2
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: 'npm'
+    steps:
+      - uses: actions/checkout@v2
 
-            - name: Run CI command
-              run: npm ci
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
-            - name: Check linting
-              run: npm run lint
-            
-            - name: Run the tests
-              run: npm run test
+      - name: Install pnpm
+        run: npm install -g pnpm
 
-            - name: Build
-              run: npm run build
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check linting
+        run: pnpm run lint
+
+      - name: Run the tests
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
