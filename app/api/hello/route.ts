@@ -141,7 +141,7 @@ export async function POST(request: Request) {
 		// Initialize the LLM
 		// @ts-ignore
 		const llm = await new ChatOpenAI({
-			modelName: "google/gemini-2.0-flash-001",
+			modelName: "mistralai/mistral-small-3.2-24b-instruct:free",
 			openAIApiKey: OPENROUTER_API_KEY,
 			configuration: {
 				baseURL: OPENROUTER_BASE_URL,

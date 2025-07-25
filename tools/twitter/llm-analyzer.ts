@@ -43,7 +43,7 @@ class LLMTradingAnalyzer {
   async analyzeTradingDecision(
       scraperResult: ScraperResult,
       cryptoSymbol: string,
-      modelName: string = 'google/gemini-2.0-flash-001'
+      modelName: string = 'mistralai/mistral-small-3.2-24b-instruct:free'
   ): Promise<TradingRecommendation> {
     try {
       // Create a prompt for the API
